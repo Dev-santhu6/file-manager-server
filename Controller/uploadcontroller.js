@@ -8,12 +8,12 @@ const cookies = require('js-cookie');
 const { getUserByEmail } = require("../Controller/usercontroller.js")
 
 
-const GOOGLE_OAUTH_CLIENT_ID = process.env.GOOGLE_OAUTH_CLIENT_ID; // Replace with your Client ID
-const GOOGLE_OAUTH_CLIENT_SECRET = process.env.GOOGLE_OAUTH_CLIENT_SECRET; // Replace with your Client Secret
+const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID; // Replace with your Client ID
+const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET; // Replace with your Client Secret
 const REDIRECT_URI = 'https://developers.google.com/oauthplayground'; // Replace with your Redirect URI
 const GOOGLE_OAUTH_REFRESH_TOKEN = process.env.GOOGLE_OAUTH_REFRESH_TOKEN;
 
-const oauth2Client = new google.auth.OAuth2(GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, REDIRECT_URI);
+const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, REDIRECT_URI);
 oauth2Client.setCredentials({ refresh_token: GOOGLE_OAUTH_REFRESH_TOKEN });
 
 const drive = google.drive({ version: 'v3', auth: oauth2Client });
