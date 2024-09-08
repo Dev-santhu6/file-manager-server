@@ -8,18 +8,18 @@ const cookies = require('js-cookie');
 const { getUserByEmail } = require("../Controller/usercontroller.js")
 
 
-const CLIENT_ID = '142217289656-h0md160b593d5usfqqlnj62v1tibrh4v.apps.googleusercontent.com'; // Replace with your Client ID
-const CLIENT_SECRET = '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'; // Replace with your Client Secret
+const GOOGLE_OAUTH_CLIENT_ID = process.env.GOOGLE_OAUTH_CLIENT_ID; // Replace with your Client ID
+const GOOGLE_OAUTH_CLIENT_SECRET = process.env.GOOGLE_OAUTH_CLIENT_SECRET; // Replace with your Client Secret
 const REDIRECT_URI = 'https://developers.google.com/oauthplayground'; // Replace with your Redirect URI
-const REFRESH_TOKEN = '1//041keHreEJ9QQCgYIARAAGAQSNwF-L9IrzssgfC19F1wKCtWztmpYGoJmE0uriS12JtU5AsU5aPqOGoJ45mvls1HjKuF4UcCcGPM';
+const GOOGLE_OAUTH_REFRESH_TOKEN = process.env.GOOGLE_OAUTH_REFRESH_TOKEN;
 
-const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
-oauth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+const oauth2Client = new google.auth.OAuth2(GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, REDIRECT_URI);
+oauth2Client.setCredentials({ refresh_token: GOOGLE_OAUTH_REFRESH_TOKEN });
 
 const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
 
-//upload files ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//upload files //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 async function findOrCreateFolder(userName, parentFolderId) {
   const response = await drive.files.list({
