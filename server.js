@@ -306,7 +306,10 @@ const port = process.env.PORT || 3001;
 
 dbConnect()
 // Enable CORS
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000/login',
+  credentials: true,
+}));
 
 app.use(bodyParser.json());
 
