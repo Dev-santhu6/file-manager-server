@@ -307,10 +307,10 @@ const port = process.env.PORT || 3001;
 dbConnect()
 // Enable CORS
 app.use(cors({
- origin: '*', // Replace with the correct frontend URL
+   origin: ['http://ecosteem-s3.s3-website-us-east-1.amazonaws.com', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
+  credentials: true, // If you need to allow cookies or authentication
 }));
 
 app.use(bodyParser.json());
