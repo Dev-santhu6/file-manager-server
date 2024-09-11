@@ -10,12 +10,12 @@ const { getUserByEmail } = require("../Controller/usercontroller.js")
 // const AWS = require('aws-sdk');
 // const ssm = new AWS.SSM();
 
-const clientId = "214101209955-vf90haefgo6snan4qgqb4nb2jekd1amm.apps.googleusercontent.com"; // Replace with your Client ID
-const clientSecret = "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"; // Replace with your Client Secret
+const GOOGLE_OAUTH_CLIENT_ID = process.env.GOOGLE_OAUTH_CLIENT_ID; // Replace with your Client ID
+const GOOGLE_OAUTH_CLIENT_SECRET = process.env.GOOGLE_OAUTH_CLIENT_SECRET; // Replace with your Client Secret
 const REDIRECT_URI = 'https://developers.google.com/oauthplayground'; // Replace with your Redirect URI
-const GOOGLE_OAUTH_REFRESH_TOKEN = "1//04_MNQ6j0IFbRCgYIARAAGAQSNwF-L9IrdvviaFyoLt_fJ76w1XCWl3u4XLabQWn1lqsnp4T6o6XVx-L_dDTYYq4lkaqdk5j1aWM";
+const GOOGLE_OAUTH_REFRESH_TOKEN = process.env.GOOGLE_OAUTH_REFRESH_TOKEN;
 
-const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, REDIRECT_URI);
+const oauth2Client = new google.auth.OAuth2(GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, REDIRECT_URI);
 oauth2Client.setCredentials({ refresh_token: GOOGLE_OAUTH_REFRESH_TOKEN });
 
 const drive = google.drive({ version: 'v3', auth: oauth2Client });
