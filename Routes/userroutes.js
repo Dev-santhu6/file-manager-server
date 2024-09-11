@@ -8,11 +8,7 @@ const {
         registerUser,
         loginUser,
         logoutUser,
-<<<<<<< HEAD
         getUserProfile  
-=======
-        getUserProfile
->>>>>>> origin/master
      
 } 
 = require('../Controller/usercontroller.js');

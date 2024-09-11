@@ -6,7 +6,8 @@ const generateToken = require('../utils/generateToken.js');
 const stream = require('stream');
 const cookies = require('js-cookie');
 const { getUserByEmail } = require("../Controller/usercontroller.js")
-
+// const AWS = require('aws-sdk');
+// const ssm = new AWS.SSM();
 
 const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID; // Replace with your Client ID
 const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET; // Replace with your Client Secret
@@ -122,8 +123,8 @@ async function loginUser(req, res) {
     res.cookie('userName', userName, {
       path: '/',
       sameSite: 'None',
-      secure: true,
-    });
+      secure: process.env.NODE_ENV === 'production',
+        });
 
     userState.userName = userName;
 
@@ -260,71 +261,6 @@ function generateMaterialTable(parsedMaterial) {
 
 // get details /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-// async function getFolderAndDetailsByName(req, res) {
-//   const { folderName } = req.params; // Assuming folder name is provided as a URL parameter
-
-//   if (!folderName) {
-//     return res.status(400).json({ message: 'Folder name is required' });
-//   }
-
-//   try {
-//     // Step 1: Find the folder by its name
-//     const folderResponse = await drive.files.list({
-//       q: `name='${folderName}' and mimeType='application/vnd.google-apps.folder'`,
-//       fields: 'files(id, name)',
-//     });
-
-//     if (folderResponse.data.files.length === 0) {
-//       return res.status(404).json({ message: 'Folder not found' });
-//     }
-
-//     const folderId = folderResponse.data.files[0].id;
-
-//     // Step 2: Retrieve the details file
-//     const detailsFileResponse = await drive.files.list({
-//       q: `'${folderId}' in parents and mimeType='text/plain'`,
-//       fields: 'files(id, name)',
-//     });
-
-//     const detailsFileId = detailsFileResponse.data.files.length > 0 ? detailsFileResponse.data.files[0].id : null;
-
-//     // Step 3: Retrieve images within the folder
-//     const imagesResponse = await drive.files.list({
-//       q: `'${folderId}' in parents and mimeType contains 'image/'`,
-//       fields: 'files(id, name, mimeType)',
-//     });
-
-//     const images = imagesResponse.data.files;
-
-//     // Retrieve the details file content if it exists
-//     let detailsFileContent = '';
-//     if (detailsFileId) {
-//       const detailsResponse = await drive.files.get({
-//         fileId: detailsFileId,
-//         alt: 'media',
-//       }, {
-//         responseType: 'text',
-//       });
-//       detailsFileContent = detailsResponse.data;
-//     }
-
-//     res.json({
-//       folderId,
-//       folderName,
-//       detailsFileId,
-//       detailsFileContent,
-//       images,
-//     });
-//   } catch (error) {
-//     console.error('Error retrieving folder details and images:', error.response ? error.response.data : error.message);
-//     res.status(500).json({ message: 'Failed to retrieve folder details and images', error: error.message });
-//   }
-// }
-
-
-
-
 async function findOrCreateFolder(userName, parentFolderId) {
   const response = await drive.files.list({
     q: `'${parentFolderId}' in parents and name='${userName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
@@ -456,147 +392,6 @@ function bufferToStream(buffer) {
   stream.end(buffer);
   return stream;
 }
-
-
-
-
-
-
-
-
-// async function updateFolderDetails(req, res) {
-//   try {
-//     const userName = userState.userName;
-//     if (!userName) {
-//       return res.status(401).json({ message: 'User not authenticated' });
-//     }
-
-//     const { folderName } = req.params;
-//     const { name, description, location, material, date, vehicleNumber, teamMembers, startMeterReading, endMeterReading } = req.body;
-//     const files = req.files || [];
-
-//     if (!name || !location || !material || !date || !vehicleNumber || !teamMembers || !startMeterReading || !endMeterReading) {
-//       return res.status(400).json({ message: 'All required fields must be provided' });
-//     }
-
-//     // Parse material details
-//     let parsedMaterial;
-//     try {
-//       parsedMaterial = JSON.parse(material);
-//       if (!Array.isArray(parsedMaterial)) {
-//         throw new Error('Material must be an array');
-//       }
-//     } catch (err) {
-//       return res.status(400).json({ message: 'Material details are incorrectly formatted' });
-//     }
-
-//     const parentFolderId = '1tGjqpHz5CpF5UNMzBuzWb6gZKl3Fr6TZ';
-//     const userFolderResponse = await drive.files.list({
-//       q: `name='${userName}' and mimeType='application/vnd.google-apps.folder' and '${parentFolderId}' in parents`,
-//       fields: 'files(id)',
-//     });
-
-//     const userFolderId = userFolderResponse.data?.files?.[0]?.id;
-//     if (!userFolderId) {
-//       return res.status(404).json({ message: 'User folder not found' });
-//     }
-
-//     const targetFolderResponse = await drive.files.list({
-//       q: `name='${folderName}' and mimeType='application/vnd.google-apps.folder' and '${userFolderId}' in parents`,
-//       fields: 'files(id)',
-//     });
-
-//     const folderId = targetFolderResponse.data?.files?.[0]?.id;
-//     if (!folderId) {
-//       return res.status(404).json({ message: `Folder ${folderName} not found` });
-//     }
-
-//     const uploadedFiles = Array.isArray(files) && files.length > 0 ? await uploadMultipleFiles(files, folderId) : [];
-
-//     const materialTable = generateMaterialTable(parsedMaterial); // Ensure this function generates a string representation
-//     const total = endMeterReading - startMeterReading;
-
-//     const detailsFileResponse = await drive.files.list({
-//       q: `'${folderId}' in parents and mimeType='text/plain' and name contains 'details'`,
-//       fields: 'files(id, name)',
-//     });
-
-//     const detailsFileId = detailsFileResponse.data?.files?.[0]?.id;
-
-//     let previousDetails = '';
-//     if (detailsFileId) {
-//       const detailsFileContent = await drive.files.get({
-//         fileId: detailsFileId,
-//         alt: 'media',
-//       });
-//       previousDetails = detailsFileContent.data || '';
-//     }
-
-//     // Extract previous name, description, and location details
-//     const nameRegex = /Name: .*/;
-//     const descriptionRegex = /Description: .*/;
-//     const locationRegex = /Location: .*/;
-
-//     previousDetails = previousDetails
-//       .replace(nameRegex, `Name: ${name}`)
-//       .replace(descriptionRegex, `Description: ${description}`)
-//       .replace(locationRegex, `Location: ${location}`);
-
-//     const detailsContent = `
-//       ${previousDetails}
-//       \n\n---\n\n
-//       Materials:
-//       ${materialTable}
-
-//       Schedule:
-//       Date: ${date}
-//       Vehicle Number: ${vehicleNumber}
-//       Team Members:
-//       ${Array.isArray(teamMembers) ? teamMembers.map(member => `- ${member}`).join('\n') : ''}
-//       Start Meter Reading: ${startMeterReading}
-//       End Meter Reading: ${endMeterReading}
-//       Total: ${total}
-//       Created by: ${userName}
-//     `.trim();
-
-//     let updatedDetailsFile;
-//     if (detailsFileId) {
-//       updatedDetailsFile = await drive.files.update({
-//         fileId: detailsFileId,
-//         media: {
-//           mimeType: 'text/plain',
-//           body: bufferToStream(Buffer.from(detailsContent)),
-//         },
-//       });
-//     } else {
-//       updatedDetailsFile = await drive.files.create({
-//         requestBody: {
-//           name: `details of ${name}.txt`,
-//           mimeType: 'text/plain',
-//           parents: [folderId],
-//         },
-//         media: {
-//           mimeType: 'text/plain',
-//           body: bufferToStream(Buffer.from(detailsContent)),
-//         },
-//       });
-//     }
-
-//     return res.json({
-//       message: 'Folder and details updated successfully!',
-//       folderId,
-//       uploadedFiles,
-//       detailsFileId: updatedDetailsFile.data.id,
-//     });
-
-//   } catch (error) {
-//     console.error('Error updating folder and details:', error.message);
-//     if (!res.headersSent) {
-//       return res.status(500).json({ message: 'Failed to update folder and details', error: error.message });
-//     }
-//   }
-// }
-
 
 async function updateFolderDetails(req, res) {
   try {
