@@ -2,6 +2,7 @@ const asynchandler = require('express-async-handler');
 const User = require('../Schema/userschema.js');
 const { google } = require('googleapis');
 const generateToken = require('../utils/generateToken.js');
+const jwt = require ( "jsonwebtoken")
 
 const stream = require('stream');
 const cookies = require('js-cookie');
@@ -194,6 +195,7 @@ async function uploadMultipleFiles(files, folderId) {
 async function uploadFileAndDetails(req, res) {
   try {
     const userName = userState.userName;
+  
     if (!userName) {
       return res.status(401).json({ message: 'User not authenticated' });
     }
@@ -639,7 +641,10 @@ async function fetchUserFolders(userName) {
 
 async function getUserFolders(req, res) {
   try {
-    const userName = userState.userName;
+    // const userName = userState.userName;
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userName = decoded.name; 
     if (!userName) {
       return res.status(401).json({ message: 'User not authenticated' });
     }
