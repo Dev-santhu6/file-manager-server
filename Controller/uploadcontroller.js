@@ -341,7 +341,9 @@ async function createFolder(folderName, parentFolderId) {
 
 async function getFolderAndDetailsByName(req, res) {
   const { folderName } = req.params; // Assuming folder name is provided as a URL parameter
-  const userName = userState.userName;
+  // const userName = userState.userName;
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const userName = decoded.name;
 
   if (!folderName) {
     return res.status(400).json({ message: 'Folder name is required' });
