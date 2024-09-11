@@ -13,10 +13,10 @@ const { getUserByEmail } = require("../Controller/usercontroller.js")
 const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID; // Replace with your Client ID
 const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET; // Replace with your Client Secret
 const REDIRECT_URI = 'https://developers.google.com/oauthplayground'; // Replace with your Redirect URI
-const GOOGLE_OAUTH_REFRESH_TOKEN = process.env.GOOGLE_OAUTH_REFRESH_TOKEN;
+const REFRESH_TOKEN = process.env.GOOGLE_OAUTH_REFRESH_TOKEN;
 
 const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, REDIRECT_URI);
-oauth2Client.setCredentials({ refresh_token: GOOGLE_OAUTH_REFRESH_TOKEN });
+oauth2Client.setCredentials({ refresh_token:REFRESH_TOKEN });
 
 const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
