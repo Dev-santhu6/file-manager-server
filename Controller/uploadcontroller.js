@@ -21,6 +21,54 @@ const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
 
 //upload files ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+const userState = {};
+
+async function loginUser(req, res) {
+  const { email, password, name } = req.body;
+
+  try {
+    const user = await getUserByEmail(email);
+
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    if (name && user.name !== name) {
+      return res.status(401).json({ message: 'Name does not match' });
+    }
+
+    generateToken(res, user.id);
+    const userName = user.name;
+
+    // Set username in a cookie and the user state object
+    res.setHeader('x-username', userName);
+    res.cookie('userName', userName, {
+      path: '/',
+      sameSite: 'None',
+      secure: process.env.NODE_ENV === 'production',
+    });
+
+    userState.userName = userName;  // Ensure userName is available for future API calls
+
+    return res.status(200).json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      token: res.cookie('jwt').value,
+    });
+
+  } catch (error) {
+    if (!res.headersSent) {
+      return res.status(500).json({ message: error.message });
+    }
+    console.error('Error in loginUser:', error.message);
+  }
+}
 
 async function findOrCreateFolder(userName, parentFolderId) {
   const response = await drive.files.list({
@@ -95,53 +143,53 @@ async function uploadMultipleFiles(files, folderId) {
   return uploadedFiles;
 }
 
-const userState = {};
+// const userState = {};
 
-async function loginUser(req, res) {
-  const { email, password, name } = req.body;
+// async function loginUser(req, res) {
+//   const { email, password, name } = req.body;
 
-  try {
-    const user = await getUserByEmail(email);
+//   try {
+//     const user = await getUserByEmail(email);
 
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
+//     if (!user) {
+//       return res.status(401).json({ message: 'Invalid email or password' });
+//     }
 
-    const isMatch = await user.matchPassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
+//     const isMatch = await user.matchPassword(password);
+//     if (!isMatch) {
+//       return res.status(401).json({ message: 'Invalid email or password' });
+//     }
 
-    if (name && user.name !== name) {
-      return res.status(401).json({ message: 'Name does not match' });
-    }
+//     if (name && user.name !== name) {
+//       return res.status(401).json({ message: 'Name does not match' });
+//     }
 
-    generateToken(res, user.id);
-    const userName = user.name;
+//     generateToken(res, user.id);
+//     const userName = user.name;
 
-    res.setHeader('x-username', userName);
-    res.cookie('userName', userName, {
-      path: '/',
-      sameSite: 'None',
-      secure: process.env.NODE_ENV === 'production',
-        });
+//     res.setHeader('x-username', userName);
+//     res.cookie('userName', userName, {
+//       path: '/',
+//       sameSite: 'None',
+//       secure: process.env.NODE_ENV === 'production',
+//         });
 
-    userState.userName = userName;
+//     userState.userName = userName;
 
-    return res.status(200).json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      token: res.cookie('jwt').value,
-    });
+//     return res.status(200).json({
+//       id: user.id,
+//       name: user.name,
+//       email: user.email,
+//       token: res.cookie('jwt').value,
+//     });
 
-  } catch (error) {
-    if (!res.headersSent) {
-      return res.status(500).json({ message: error.message });
-    }
-    console.error('Error in loginUser:', error.message);
-  }
-}
+//   } catch (error) {
+//     if (!res.headersSent) {
+//       return res.status(500).json({ message: error.message });
+//     }
+//     console.error('Error in loginUser:', error.message);
+//   }
+// }
 
 async function uploadFileAndDetails(req, res) {
   try {
