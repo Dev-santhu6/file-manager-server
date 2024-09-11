@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-/.env
-=======
-.env
+
 config.json
 node_modules
 .vercel
->>>>>>> origin/master
