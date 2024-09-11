@@ -307,7 +307,7 @@ const port = process.env.PORT || 3001;
 dbConnect()
 // Enable CORS
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: 'https://ecosteem.netlify.app',
   credentials: true,
 }));
 
